@@ -56,6 +56,19 @@ const FEED_SOURCES: FeedSource[] = [
       "https://www.youtube.com/feeds/videos.xml?channel_id=UC2pUjr6WECIEprPQxcD51OA",
     category: "official",
   },
+  // Social / Journalists (Bluesky)
+  {
+    name: "Andrew Moon",
+    url: "https://bsky.app/profile/mrandrewmoon.bsky.social",
+    rssUrl: "https://bsky.app/profile/mrandrewmoon.bsky.social/rss",
+    category: "social",
+  },
+  {
+    name: "Pompey News Now",
+    url: "https://bsky.app/profile/pompeynewsnow.bsky.social",
+    rssUrl: "https://bsky.app/profile/pompeynewsnow.bsky.social/rss",
+    category: "social",
+  },
 ];
 
 // Custom parser for YouTube feeds

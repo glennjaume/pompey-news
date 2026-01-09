@@ -16,6 +16,7 @@ interface NewsItem {
 interface NewsTabsProps {
   newsItems: NewsItem[];
   officialItems: NewsItem[];
+  socialItems: NewsItem[];
 }
 
 function getRelativeTime(dateStr: string): string {
@@ -35,6 +36,7 @@ function getRelativeTime(dateStr: string): string {
 
 function NewsCard({ item }: { item: NewsItem }) {
   const isVideo = item.category === "official" && item.source.includes("YouTube");
+  const isSocial = item.category === "social";
 
   return (
     <a
@@ -52,19 +54,24 @@ function NewsCard({ item }: { item: NewsItem }) {
           />
         </div>
       )}
-      <h2 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-[#001489] dark:group-hover:text-[#bba14f] transition-colors leading-snug">
-        {item.title}
-      </h2>
+      {isSocial ? (
+        // Social posts: show full content as the "title" is usually the post text
+        <p className="text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap">
+          {item.title}
+        </p>
+      ) : (
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-[#001489] dark:group-hover:text-[#bba14f] transition-colors leading-snug">
+          {item.title}
+        </h2>
+      )}
       <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
         <span className="font-medium text-[#001489] dark:text-[#bba14f]">
           {item.source}
         </span>
         <span>·</span>
-        <time dateTime={item.pubDate}>
-          {getRelativeTime(item.pubDate)}
-        </time>
+        <time dateTime={item.pubDate}>{getRelativeTime(item.pubDate)}</time>
       </div>
-      {item.description && !isVideo && (
+      {item.description && !isVideo && !isSocial && (
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
           {item.description}
         </p>
@@ -73,25 +80,43 @@ function NewsCard({ item }: { item: NewsItem }) {
   );
 }
 
-export function NewsTabs({ newsItems, officialItems }: NewsTabsProps) {
-  const [activeTab, setActiveTab] = useState<"news" | "official">("news");
+export function NewsTabs({ newsItems, officialItems, socialItems }: NewsTabsProps) {
+  const [activeTab, setActiveTab] = useState<"news" | "official" | "social">("news");
 
   const tabs = [
     { id: "news" as const, label: "News", count: newsItems.length },
     { id: "official" as const, label: "Official", count: officialItems.length },
+    { id: "social" as const, label: "Social", count: socialItems.length },
   ];
 
-  const items = activeTab === "news" ? newsItems : officialItems;
+  const getItems = () => {
+    switch (activeTab) {
+      case "news":
+        return newsItems;
+      case "official":
+        return officialItems;
+      case "social":
+        return socialItems;
+    }
+  };
+
+  const items = getItems();
+
+  const emptyMessage = {
+    news: "No news articles available right now.",
+    official: "No official content available right now.",
+    social: "No social posts available right now.",
+  };
 
   return (
     <div>
       {/* Tab Buttons */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
               activeTab === tab.id
                 ? "bg-[#001489] text-white"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -119,7 +144,7 @@ export function NewsTabs({ newsItems, officialItems }: NewsTabsProps) {
           ))
         ) : (
           <div className="text-center py-12 text-slate-500">
-            <p>No {activeTab === "news" ? "news" : "official content"} available right now.</p>
+            <p>{emptyMessage[activeTab]}</p>
           </div>
         )}
       </div>

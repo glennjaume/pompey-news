@@ -20,6 +20,7 @@ export default async function Home() {
   const allNews = await fetchAllNews();
   const newsItems = serializeNews(getNewsByCategory(allNews, "news"));
   const officialItems = serializeNews(getNewsByCategory(allNews, "official"));
+  const socialItems = serializeNews(getNewsByCategory(allNews, "social"));
   const lastUpdated = new Date();
 
   const headlines = allNews
@@ -60,7 +61,7 @@ export default async function Home() {
         </div>
 
         {/* Tabbed Content */}
-        <NewsTabs newsItems={newsItems} officialItems={officialItems} />
+        <NewsTabs newsItems={newsItems} officialItems={officialItems} socialItems={socialItems} />
       </div>
 
       {/* Footer */}
