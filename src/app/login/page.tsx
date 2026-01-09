@@ -65,9 +65,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-blue-200/50 text-xs">
-          Play Up Pompey!
-        </p>
       </div>
     </main>
   );

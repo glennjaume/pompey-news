@@ -1,27 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const AUTH_TOKEN = "authenticated";
+
 export function middleware(request: NextRequest) {
-  const password = process.env.SITE_PASSWORD;
-
-  // If no password is set, allow access
-  if (!password) {
-    return NextResponse.next();
-  }
-
   // Check for auth cookie
   const authCookie = request.cookies.get("pompey-auth");
-  if (authCookie?.value === password) {
+  if (authCookie?.value === AUTH_TOKEN) {
     return NextResponse.next();
   }
 
-  // Check if this is a login attempt
-  if (request.method === "POST" && request.nextUrl.pathname === "/login") {
-    return NextResponse.next();
-  }
-
-  // Allow the login page
-  if (request.nextUrl.pathname === "/login") {
+  // Allow the login page and API
+  if (
+    request.nextUrl.pathname === "/login" ||
+    request.nextUrl.pathname === "/api/login"
+  ) {
     return NextResponse.next();
   }
 
