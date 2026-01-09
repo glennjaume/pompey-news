@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --pompey-blue: #001489;
+  --pompey-gold: #bba14f;
+}
+
+body {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f172a;
+  }
+}
