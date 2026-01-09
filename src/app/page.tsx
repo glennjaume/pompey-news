@@ -1,4 +1,5 @@
 import { fetchAllNews, getRelativeTime, type NewsItem } from "@/lib/feeds";
+import { generateNewsSummary } from "@/lib/summary";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -32,8 +33,29 @@ function NewsCard({ item }: { item: NewsItem }) {
   );
 }
 
+function AISummary({ summary }: { summary: string | null }) {
+  if (!summary) return null;
+
+  return (
+    <div className="mb-6 p-4 bg-gradient-to-r from-[#001489]/5 to-[#bba14f]/5 dark:from-[#001489]/20 dark:to-[#bba14f]/20 rounded-lg border border-[#001489]/20 dark:border-[#bba14f]/30">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-semibold text-[#001489] dark:text-[#bba14f]">
+          AI Summary
+        </span>
+        <span className="text-xs text-slate-400 dark:text-slate-500">
+          powered by Claude
+        </span>
+      </div>
+      <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
+        {summary}
+      </p>
+    </div>
+  );
+}
+
 export default async function Home() {
   const news = await fetchAllNews();
+  const summary = await generateNewsSummary(news);
   const lastUpdated = new Date();
 
   return (
@@ -53,6 +75,9 @@ export default async function Home() {
 
       {/* News Feed */}
       <div className="max-w-3xl mx-auto px-4 py-6">
+        {/* AI Summary */}
+        <AISummary summary={summary} />
+
         {/* Status Bar */}
         <div className="flex items-center justify-between mb-4 text-sm text-slate-500 dark:text-slate-400">
           <span>{news.length} articles</span>
