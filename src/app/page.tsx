@@ -2,8 +2,10 @@ import {
   fetchAllNews,
   getNewsByCategory,
 } from "@/lib/feeds";
+import { fetchFixtures } from "@/lib/fixtures";
 import { AISummary } from "@/components/AISummary";
 import { NewsTabs } from "@/components/NewsTabs";
+import { Fixtures } from "@/components/Fixtures";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -17,7 +19,10 @@ function serializeNews(items: Awaited<ReturnType<typeof fetchAllNews>>) {
 }
 
 export default async function Home() {
-  const allNews = await fetchAllNews();
+  const [allNews, fixtures] = await Promise.all([
+    fetchAllNews(),
+    fetchFixtures(),
+  ]);
   const newsItems = serializeNews(getNewsByCategory(allNews, "news"));
   const officialItems = serializeNews(getNewsByCategory(allNews, "official"));
   const socialItems = serializeNews(getNewsByCategory(allNews, "social"));
@@ -45,6 +50,9 @@ export default async function Home() {
 
       {/* News Feed */}
       <div className="max-w-3xl mx-auto px-4 py-6">
+        {/* Fixtures */}
+        <Fixtures fixtures={fixtures} />
+
         {/* AI Summary */}
         <AISummary headlines={headlines} />
 
