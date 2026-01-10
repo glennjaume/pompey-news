@@ -2,13 +2,14 @@ import {
   fetchAllNews,
   getNewsByCategory,
 } from "@/lib/feeds";
-import { fetchFixtures } from "@/lib/fixtures";
+import { fetchFixtures, fetchResults, fetchStandings, fetchScorers } from "@/lib/fixtures";
+import { generateSummary } from "@/lib/summary";
 import { AISummary } from "@/components/AISummary";
 import { NewsTabs } from "@/components/NewsTabs";
-import { Fixtures } from "@/components/Fixtures";
+import { FixturesAndResults } from "@/components/FixturesAndResults";
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Revalidate every hour for AI summary
+export const revalidate = 3600;
 
 // Serialize news items for client components (Date -> string)
 function serializeNews(items: Awaited<ReturnType<typeof fetchAllNews>>) {
@@ -19,9 +20,12 @@ function serializeNews(items: Awaited<ReturnType<typeof fetchAllNews>>) {
 }
 
 export default async function Home() {
-  const [allNews, fixtures] = await Promise.all([
+  const [allNews, fixtures, results, standings, scorers] = await Promise.all([
     fetchAllNews(),
     fetchFixtures(),
+    fetchResults(),
+    fetchStandings(),
+    fetchScorers(),
   ]);
   const newsItems = serializeNews(getNewsByCategory(allNews, "news"));
   const officialItems = serializeNews(getNewsByCategory(allNews, "official"));
@@ -32,6 +36,9 @@ export default async function Home() {
     .filter((item) => item.category === "news")
     .slice(0, 15)
     .map((item) => `"${item.title}" (${item.source})`);
+
+  // Generate AI summary server-side (cached for 1 hour)
+  const summaryData = await generateSummary(headlines);
 
   return (
     <main className="min-h-screen">
@@ -50,11 +57,11 @@ export default async function Home() {
 
       {/* News Feed */}
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {/* Fixtures */}
-        <Fixtures fixtures={fixtures} />
+        {/* Fixtures and Results */}
+        <FixturesAndResults fixtures={fixtures} results={results} />
 
         {/* AI Summary */}
-        <AISummary headlines={headlines} />
+        <AISummary summaryData={summaryData} />
 
         {/* Status Bar */}
         <div className="flex items-center justify-between mb-4 text-sm text-slate-500 dark:text-slate-400">
@@ -69,7 +76,7 @@ export default async function Home() {
         </div>
 
         {/* Tabbed Content */}
-        <NewsTabs newsItems={newsItems} officialItems={officialItems} socialItems={socialItems} />
+        <NewsTabs newsItems={newsItems} officialItems={officialItems} socialItems={socialItems} standings={standings} scorers={scorers} />
       </div>
 
       {/* Footer */}

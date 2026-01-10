@@ -56,17 +56,17 @@ const FEED_SOURCES: FeedSource[] = [
       "https://www.youtube.com/feeds/videos.xml?channel_id=UC2pUjr6WECIEprPQxcD51OA",
     category: "official",
   },
-  // Social / Journalists (Bluesky)
+  // Social / Journalists (Bluesky - must use DID format for RSS)
   {
     name: "Andrew Moon",
     url: "https://bsky.app/profile/mrandrewmoon.bsky.social",
-    rssUrl: "https://bsky.app/profile/mrandrewmoon.bsky.social/rss",
+    rssUrl: "https://bsky.app/profile/did:plc:uwyx4du4dyh5v6rv5wxsb6vb/rss",
     category: "social",
   },
   {
     name: "Pompey News Now",
     url: "https://bsky.app/profile/pompeynewsnow.bsky.social",
-    rssUrl: "https://bsky.app/profile/pompeynewsnow.bsky.social/rss",
+    rssUrl: "https://bsky.app/profile/did:plc:tp4pkqi4x2i5mpyj3j4darxb/rss",
     category: "social",
   },
 ];
@@ -98,13 +98,16 @@ async function fetchFeed(source: FeedSource): Promise<NewsItem[]> {
         thumbnail = mediaGroup["media:thumbnail"][0].$.url;
       }
 
+      // Bluesky posts don't have titles, use content instead
+      const title = item.title || item.contentSnippet || item.content || "Untitled";
+
       return {
-        title: item.title || "Untitled",
+        title,
         link: item.link || "#",
         source: source.name,
         sourceUrl: source.url,
         pubDate: item.pubDate ? new Date(item.pubDate) : new Date(),
-        description: item.contentSnippet || item.content || undefined,
+        description: item.title ? (item.contentSnippet || item.content || undefined) : undefined,
         category: source.category,
         thumbnail,
       };
