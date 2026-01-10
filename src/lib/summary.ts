@@ -37,7 +37,12 @@ export async function generateSummary(headlines: string[]): Promise<SummaryData>
       .join("\n");
 
     const transferFocus = isTransferWindow()
-      ? `\n\nIMPORTANT: It's transfer window time! Pay special attention to any transfer news - signings, rumors, departures. For any player mentioned in transfer context, include their name and position abbreviation (GK, CB, RB, LB, CDM, CM, CAM, RW, LW, ST, CF).`
+      ? `\n\nIMPORTANT: It's transfer window time! Format your summary in this structure:
+- Start with "Current news:" followed by a brief summary of non-transfer news
+- Then "Signed:" followed by a list of any players officially signed this window (format: "Name (POS)" e.g. "John Smith (CM)"). Say "None announced" if no signings in the headlines.
+- Then "Rumored:" followed by players the club is reportedly interested in or linked with (format: "Name (POS)"). Say "None currently" if no rumors.
+
+Use position abbreviations: GK, CB, RB, LB, CDM, CM, CAM, RW, LW, ST, CF.`
       : "";
 
     const message = await anthropic.messages.create({
