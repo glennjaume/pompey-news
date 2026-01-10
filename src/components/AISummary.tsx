@@ -4,6 +4,65 @@ interface AISummaryProps {
   summaryData: SummaryData;
 }
 
+function SummaryContent({ summary }: { summary: string }) {
+  // Check if this is transfer window format
+  const isTransferFormat = summary.includes("Current news:") ||
+                           summary.includes("Signed:") ||
+                           summary.includes("Rumored:");
+
+  if (!isTransferFormat) {
+    return (
+      <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
+        {summary}
+      </p>
+    );
+  }
+
+  // Parse transfer window format
+  const sections: { label: string; content: string; icon: string }[] = [];
+
+  // Extract each section using regex
+  const currentNewsMatch = summary.match(/Current news:\s*([^]*?)(?=Signed:|Rumored:|$)/i);
+  const signedMatch = summary.match(/Signed:\s*([^]*?)(?=Rumored:|$)/i);
+  const rumoredMatch = summary.match(/Rumored:\s*([^]*?)$/i);
+
+  if (currentNewsMatch?.[1]?.trim()) {
+    sections.push({ label: "Current News", content: currentNewsMatch[1].trim(), icon: "📰" });
+  }
+  if (signedMatch?.[1]?.trim()) {
+    sections.push({ label: "Signed", content: signedMatch[1].trim(), icon: "✅" });
+  }
+  if (rumoredMatch?.[1]?.trim()) {
+    sections.push({ label: "Rumored", content: rumoredMatch[1].trim(), icon: "👀" });
+  }
+
+  if (sections.length === 0) {
+    return (
+      <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
+        {summary}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {sections.map((section, i) => (
+        <div key={i}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <span>{section.icon}</span>
+            <span className="text-xs font-semibold text-[#001489] dark:text-[#bba14f] uppercase tracking-wide">
+              {section.label}
+            </span>
+          </div>
+          <p className="text-slate-700 dark:text-slate-200 leading-relaxed pl-5">
+            {section.content}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function getRelativeTime(isoDate: string): string {
   const date = new Date(isoDate);
   const now = new Date();
@@ -40,9 +99,7 @@ export function AISummary({ summaryData }: AISummaryProps) {
         </span>
       </div>
 
-      <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
-        {summary}
-      </p>
+      <SummaryContent summary={summary} />
 
       {clusters.length > 0 && (
         <div className="mt-3 pt-3 border-t border-[#001489]/10 dark:border-[#bba14f]/20">
